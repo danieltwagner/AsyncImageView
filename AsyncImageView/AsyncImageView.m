@@ -517,18 +517,31 @@ NSString *const AsyncImageErrorKey = @"error";
 {
     //start connections
     NSInteger count = 0;
-    for (AsyncImageConnection *connection in connections)
+    for (int i = 0; i < [connections count]; i++)
     {
+        AsyncImageConnection *connection = [connections objectAtIndex:i];
         if (![connection isLoading])
         {
             if ([connection isInCache])
             {
                 [connection start];
-            }
-            else if (count < concurrentLoads)
-            {
-                count ++;
-                [connection start];
+            } else {
+                
+                // Do not fetch a URL twice. Instead, we let the connection sit here
+                // and wait for the first connection to finish.
+                BOOL foundEarlier = NO;
+                for (int j = 0; j < i; j++) {
+                    AsyncImageConnection *otherConnection = [connections objectAtIndex:j];
+                    if ([otherConnection.URL isEqual:connection.URL]) {
+                        foundEarlier = YES;
+                        break;
+                    }
+                }
+                
+                if (!foundEarlier && (count < concurrentLoads)) {
+                    count ++;
+                    [connection start];
+                }
             }
         }
     }
@@ -543,19 +556,6 @@ NSString *const AsyncImageErrorKey = @"error";
         AsyncImageConnection *connection = [connections objectAtIndex:i];
         if (connection.URL == URL || [connection.URL isEqual:URL])
         {
-            //cancel earlier connections for same target/action
-            for (int j = i - 1; j >= 0; j--)
-            {
-                AsyncImageConnection *earlier = [connections objectAtIndex:j];
-                if (earlier.target == connection.target &&
-                    earlier.success == connection.success)
-                {
-                    [earlier cancel];
-                    [connections removeObjectAtIndex:j];
-                    i--;
-                }
-            }
-            
             //cancel connection (in case it's a duplicate)
             [connection cancel];
             
