@@ -710,7 +710,12 @@ NSString *const AsyncImageErrorKey = @"error";
 
 - (void)setImageURL:(NSURL *)imageURL
 {
-	[[AsyncImageLoader sharedLoader] loadImageWithURL:imageURL target:self action:@selector(setImage:)];
+    UIImage *img = [[AsyncImageCache sharedCache] imageForURL:imageURL];
+    if(img) {
+        self.image = img;
+    } else {
+        [[AsyncImageLoader sharedLoader] loadImageWithURL:imageURL target:self action:@selector(setImage:)];
+    }
 }
 
 - (NSURL *)imageURL
