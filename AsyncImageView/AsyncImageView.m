@@ -710,12 +710,12 @@ NSString *const AsyncImageErrorKey = @"error";
 
 - (void)setImageURL:(NSURL *)imageURL
 {
-    [[AsyncImageLoader sharedLoader] loadImageWithURL:imageURL target:self action:@selector(setImage:)];
+    [[AsyncImageLoader sharedLoader] loadImageWithURL:imageURL target:self action:@selector(setImageAsync:)];
 }
 
 - (NSURL *)imageURL
 {
-	return [[AsyncImageLoader sharedLoader] URLForTarget:self action:@selector(setImage:)];
+	return [[AsyncImageLoader sharedLoader] URLForTarget:self action:@selector(setImageAsync:)];
 }
 
 @end
@@ -727,7 +727,8 @@ NSString *const AsyncImageErrorKey = @"error";
 
 @end
 
-BOOL defaultCrossFade = YES;
+BOOL defaultCrossFadeAll = YES;
+BOOL defaultCrossFadeAsync = YES;
 BOOL defaultActivityIndicator = YES;
 BOOL loadCachedImagesSynchronously = NO;
 
@@ -735,7 +736,8 @@ BOOL loadCachedImagesSynchronously = NO;
 
 @synthesize showActivityIndicator;
 @synthesize activityIndicatorStyle;
-@synthesize crossfadeImages;
+@synthesize crossfadeAllImages;
+@synthesize crossfadeAsyncImages;
 @synthesize crossfadeDuration;
 @synthesize activityView;
 
@@ -743,7 +745,8 @@ BOOL loadCachedImagesSynchronously = NO;
 {
 	showActivityIndicator = defaultActivityIndicator ? (self.image == nil) : NO;
 	activityIndicatorStyle = UIActivityIndicatorViewStyleGray;
-    crossfadeImages = defaultCrossFade;
+    crossfadeAllImages = defaultCrossFadeAll;
+    crossfadeAsyncImages = defaultCrossFadeAsync;
 	crossfadeDuration = 0.4;
 }
 
@@ -799,7 +802,7 @@ BOOL loadCachedImagesSynchronously = NO;
 
 - (void)setImage:(UIImage *)image
 {
-    if (crossfadeImages)
+    if (crossfadeAllImages)
     {
         CATransition *animation = [CATransition animation];
         animation.type = kCATransitionFade;
@@ -810,8 +813,23 @@ BOOL loadCachedImagesSynchronously = NO;
     [activityView stopAnimating];
 }
 
-+ (void)setDefaultCrossFade:(BOOL)val {
-    defaultCrossFade = val;
+- (void)setImageAsync:(UIImage *)image
+{
+    if (crossfadeAsyncImages && !crossfadeAllImages) {
+        CATransition *animation = [CATransition animation];
+        animation.type = kCATransitionFade;
+        animation.duration = crossfadeDuration;
+        [self.layer addAnimation:animation forKey:nil];
+    }
+    self.image = image;
+}
+
++ (void)setDefaultCrossFadeAll:(BOOL)val {
+    defaultCrossFadeAll = val;
+}
+
++ (void)setDefaultCrossFadeAsync:(BOOL)val {
+    defaultCrossFadeAsync = val;
 }
 
 + (void)setDefaultActivityIndicator:(BOOL)val {
