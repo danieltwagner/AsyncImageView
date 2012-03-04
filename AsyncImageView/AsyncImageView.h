@@ -131,5 +131,6 @@ extern NSString *const AsyncImageErrorKey;
 
 + (void)setDefaultCrossFade:(BOOL)val;
 + (void)setDefaultActivityIndicator:(BOOL)val;
++ (void)loadCachedImagesSynchronously:(BOOL)val;
 
 @end

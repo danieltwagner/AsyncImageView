@@ -710,12 +710,7 @@ NSString *const AsyncImageErrorKey = @"error";
 
 - (void)setImageURL:(NSURL *)imageURL
 {
-    UIImage *img = [[AsyncImageCache sharedCache] imageForURL:imageURL];
-    if(img) {
-        self.image = img;
-    } else {
-        [[AsyncImageLoader sharedLoader] loadImageWithURL:imageURL target:self action:@selector(setImage:)];
-    }
+    [[AsyncImageLoader sharedLoader] loadImageWithURL:imageURL target:self action:@selector(setImage:)];
 }
 
 - (NSURL *)imageURL
@@ -734,7 +729,7 @@ NSString *const AsyncImageErrorKey = @"error";
 
 BOOL defaultCrossFade = YES;
 BOOL defaultActivityIndicator = YES;
-
+BOOL loadCachedImagesSynchronously = NO;
 
 @implementation AsyncImageView
 
@@ -772,6 +767,14 @@ BOOL defaultActivityIndicator = YES;
 
 - (void)setImageURL:(NSURL *)imageURL
 {
+    if(loadCachedImagesSynchronously) {
+        UIImage *img = [[AsyncImageCache sharedCache] imageForURL:imageURL];
+        if(img) {
+            self.image = img;
+            return;
+        }
+    }
+    
     super.imageURL = imageURL;
     if (showActivityIndicator && !self.image)
     {
@@ -813,6 +816,10 @@ BOOL defaultActivityIndicator = YES;
 
 + (void)setDefaultActivityIndicator:(BOOL)val {
     defaultActivityIndicator = val;
+}
+
++ (void)loadCachedImagesSynchronously:(BOOL)val {
+    loadCachedImagesSynchronously = val;
 }
 
 - (void)dealloc
