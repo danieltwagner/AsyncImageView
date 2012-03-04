@@ -90,6 +90,19 @@ NSString *const AsyncImageErrorKey = @"error";
     return cache.countLimit;
 }
 
+- (void)setPathOnDisk:(NSString *)path
+{
+    NSFileManager *fileManager= [NSFileManager defaultManager]; 
+    if(![fileManager fileExistsAtPath:path]) {
+        if(![fileManager createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:NULL]) 
+        {
+            NSLog(@"Error: Could not create storage directory!");
+        }
+    }
+    
+    pathOnDisk = [path copy];
+}
+
 - (UIImage *)imageForURL:(NSURL *)URL
 {
 	if (useImageNamed && [URL isFileURL])
@@ -102,7 +115,19 @@ NSString *const AsyncImageErrorKey = @"error";
 			return [UIImage imageNamed:imageName];
 		}
 	}
-    return [cache objectForKey:URL];
+    
+    UIImage *img = [cache objectForKey:URL];
+    if (!img && storeToDisk && pathOnDisk)
+    {
+        NSString *path = [pathOnDisk stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", URL.hash]];
+        if([[NSFileManager defaultManager] fileExistsAtPath:path]) 
+        {
+            img = [UIImage imageWithContentsOfFile:path];
+            [cache setObject:img forKey:URL];
+        }
+    }
+    
+    return img;
 }
 
 - (void)setImage:(UIImage *)image forURL:(NSURL *)URL
@@ -118,22 +143,39 @@ NSString *const AsyncImageErrorKey = @"error";
         }
     }
     [cache setObject:image forKey:URL];
-    
-    if (storeToDisk)
-    {
-        image.data
-    }
 }
 
 - (void)removeImageForURL:(NSURL *)URL
 {
     [cache removeObjectForKey:URL];
+    
+    if (storeToDisk && pathOnDisk)
+    {
+        // remove the item from the disk cache as well
+        NSString *path = [pathOnDisk stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", URL.hash]];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:path])
+        {
+            [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+        }
+    }
 }
 
 - (void)clearCache
 {
     //remove objects that aren't in use
     [cache removeAllObjects];
+}
+
+- (void)clearDiskCache
+{
+    if (storeToDisk && pathOnDisk)
+    {
+        // delete the entire disk cache
+        if ([[NSFileManager defaultManager] fileExistsAtPath:pathOnDisk])
+        {
+            [[NSFileManager defaultManager] removeItemAtPath:pathOnDisk error:nil];
+        }
+    }
 }
 
 - (void)dealloc
@@ -302,6 +344,13 @@ NSString *const AsyncImageErrorKey = @"error";
 			UIImage *image = [[UIImage alloc] initWithData:_data];
 			if (image)
 			{
+                @autoreleasepool {
+                    if([cache storeToDisk] && [cache pathOnDisk])
+                    {
+                        [_data writeToFile:[[cache pathOnDisk] stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", URL.hash]] atomically:YES];
+                    }
+                }
+                
 				[self decompressImageInBackground:image];
                 AH_RELEASE(image);
 			}
@@ -678,6 +727,9 @@ NSString *const AsyncImageErrorKey = @"error";
 
 @end
 
+BOOL defaultCrossFade = YES;
+BOOL defaultActivityIndicator = YES;
+
 
 @implementation AsyncImageView
 
@@ -689,9 +741,9 @@ NSString *const AsyncImageErrorKey = @"error";
 
 - (void)setUp
 {
-	showActivityIndicator = (self.image == nil);
+	showActivityIndicator = defaultActivityIndicator ? (self.image == nil) : NO;
 	activityIndicatorStyle = UIActivityIndicatorViewStyleGray;
-    crossfadeImages = YES;
+    crossfadeImages = defaultCrossFade;
 	crossfadeDuration = 0.4;
 }
 
@@ -748,6 +800,14 @@ NSString *const AsyncImageErrorKey = @"error";
     }
     super.image = image;
     [activityView stopAnimating];
+}
+
++ (void)setDefaultCrossFade:(BOOL)val {
+    defaultCrossFade = val;
+}
+
++ (void)setDefaultActivityIndicator:(BOOL)val {
+    defaultActivityIndicator = val;
 }
 
 - (void)dealloc

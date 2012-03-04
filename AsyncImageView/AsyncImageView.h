@@ -90,6 +90,7 @@ extern NSString *const AsyncImageErrorKey;
 - (void)setImage:(UIImage *)image forURL:(NSURL *)URL;
 - (void)removeImageForURL:(NSURL *)URL;
 - (void)clearCache;
+- (void)clearDiskCache;
 
 @end
 
@@ -127,5 +128,8 @@ extern NSString *const AsyncImageErrorKey;
 @property (nonatomic, assign) UIActivityIndicatorViewStyle activityIndicatorStyle;
 @property (nonatomic, assign) BOOL crossfadeImages;
 @property (nonatomic, assign) NSTimeInterval crossfadeDuration;
+
++ (void)setDefaultCrossFade:(BOOL)val;
++ (void)setDefaultActivityIndicator:(BOOL)val;
 
 @end
