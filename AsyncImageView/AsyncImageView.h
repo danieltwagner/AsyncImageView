@@ -81,6 +81,8 @@ extern NSString *const AsyncImageErrorKey;
 
 + (AsyncImageCache *)sharedCache;
 
+@property (nonatomic, assign) BOOL storeToDisk;
+@property (nonatomic, copy) NSString *pathOnDisk;
 @property (nonatomic, assign) BOOL useImageNamed;
 @property (nonatomic, assign) NSUInteger countLimit;
 

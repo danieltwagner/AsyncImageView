@@ -57,6 +57,8 @@ NSString *const AsyncImageErrorKey = @"error";
 
 @synthesize cache;
 @synthesize useImageNamed;
+@synthesize storeToDisk;
+@synthesize pathOnDisk;
 
 + (AsyncImageCache *)sharedCache
 {
@@ -116,6 +118,11 @@ NSString *const AsyncImageErrorKey = @"error";
         }
     }
     [cache setObject:image forKey:URL];
+    
+    if (storeToDisk)
+    {
+        image.data
+    }
 }
 
 - (void)removeImageForURL:(NSURL *)URL
