@@ -694,6 +694,19 @@ NSString *const AsyncImageErrorKey = @"error";
     }
 }
 
+- (void)cancelLoadingForTarget:(id)target
+{
+    for (int i = [connections count] - 1; i >= 0; i--)
+    {
+        AsyncImageConnection *connection = [connections objectAtIndex:i];
+        if (connection.target == target)
+        {
+            [connection cancel];
+            [connections removeObjectAtIndex:i];
+        }
+    }
+}
+
 - (NSURL *)URLForTarget:(id)target action:(SEL)action
 {
     //return the most recent image URL assigned to the target

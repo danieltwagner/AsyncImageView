@@ -110,6 +110,7 @@ extern NSString *const AsyncImageErrorKey;
 - (void)cancelLoadingURL:(NSURL *)URL target:(id)target action:(SEL)action;
 - (void)cancelLoadingURL:(NSURL *)URL target:(id)target;
 - (void)cancelLoadingURL:(NSURL *)URL;
+- (void)cancelLoadingForTarget:(id)target;
 - (NSURL *)URLForTarget:(id)target action:(SEL)action;
 
 @end
