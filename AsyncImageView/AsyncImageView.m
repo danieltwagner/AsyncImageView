@@ -380,6 +380,13 @@ NSString *const AsyncImageErrorKey = @"error";
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)_data
 {
+    //check for released target
+    if ([target retainCount] == 1)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:AsyncImageTargetReleased object:target];
+        return;
+    }
+    
     //check for cached image
 	UIImage *image = [cache imageForURL:URL];
     if (image)
@@ -417,6 +424,13 @@ NSString *const AsyncImageErrorKey = @"error";
 	//begin loading
 	loading = YES;
 	cancelled = NO;
+    
+    //check for released target
+    if ([target retainCount] == 1)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:AsyncImageTargetReleased object:target];
+        return;
+    }
     
     //check for nil URL
     if (URL == nil)
