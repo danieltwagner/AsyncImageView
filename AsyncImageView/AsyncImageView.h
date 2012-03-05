@@ -130,10 +130,12 @@ extern NSString *const AsyncImageErrorKey;
 @property (nonatomic, assign) BOOL crossfadeAllImages;
 @property (nonatomic, assign) BOOL crossfadeAsyncImages;
 @property (nonatomic, assign) NSTimeInterval crossfadeDuration;
+@property (nonatomic, assign) BOOL loadOnlyMostRecentURL;
 
 + (void)setDefaultCrossFadeAll:(BOOL)val;
 + (void)setDefaultCrossFadeAsync:(BOOL)val;
 + (void)setDefaultActivityIndicator:(BOOL)val;
++ (void)setDefaultLoadOnlyMostRecentURL:(BOOL)val;
 + (void)loadCachedImagesSynchronously:(BOOL)val;
 
 @end

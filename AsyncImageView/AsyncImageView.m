@@ -758,6 +758,7 @@ BOOL defaultCrossFadeAll = YES;
 BOOL defaultCrossFadeAsync = YES;
 BOOL defaultActivityIndicator = YES;
 BOOL loadCachedImagesSynchronously = NO;
+BOOL defaultLoadOnlyMostRecentURL = NO;
 
 @implementation AsyncImageView
 
@@ -767,6 +768,7 @@ BOOL loadCachedImagesSynchronously = NO;
 @synthesize crossfadeAsyncImages;
 @synthesize crossfadeDuration;
 @synthesize activityView;
+@synthesize loadOnlyMostRecentURL;
 
 - (void)setUp
 {
@@ -775,6 +777,7 @@ BOOL loadCachedImagesSynchronously = NO;
     crossfadeAllImages = defaultCrossFadeAll;
     crossfadeAsyncImages = defaultCrossFadeAsync;
 	crossfadeDuration = 0.4;
+    loadOnlyMostRecentURL = defaultLoadOnlyMostRecentURL;
 }
 
 - (id)initWithFrame:(CGRect)frame
@@ -797,6 +800,8 @@ BOOL loadCachedImagesSynchronously = NO;
 
 - (void)setImageURL:(NSURL *)imageURL
 {
+    if(loadOnlyMostRecentURL) [[AsyncImageLoader sharedLoader] cancelLoadingForTarget:self];
+    
     if(loadCachedImagesSynchronously) {
         UIImage *img = [[AsyncImageCache sharedCache] imageForURL:imageURL];
         if(img) {
@@ -861,6 +866,10 @@ BOOL loadCachedImagesSynchronously = NO;
 
 + (void)setDefaultActivityIndicator:(BOOL)val {
     defaultActivityIndicator = val;
+}
+
++ (void)setDefaultLoadOnlyMostRecentURL:(BOOL)val {
+    defaultLoadOnlyMostRecentURL = val;
 }
 
 + (void)loadCachedImagesSynchronously:(BOOL)val {
