@@ -878,7 +878,7 @@ BOOL defaultLoadOnlyMostRecentURL = NO;
 
 - (void)dealloc
 {
-    [[AsyncImageLoader sharedLoader] cancelLoadingURL:self.imageURL target:self];
+    [[AsyncImageLoader sharedLoader] cancelLoadingForTarget:self];
 	AH_RELEASE(activityView);
     AH_SUPER_DEALLOC;
 }
