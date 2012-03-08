@@ -468,9 +468,13 @@ NSString *const AsyncImageErrorKey = @"error";
 - (void)dealloc
 {
     AH_RELEASE(connection);
+    connection = nil;
     AH_RELEASE(data);
+    data = nil;
     AH_RELEASE(URL);
+    URL = nil;
     AH_RELEASE(target);
+    target = nil;
     AH_SUPER_DEALLOC;
 }
 
