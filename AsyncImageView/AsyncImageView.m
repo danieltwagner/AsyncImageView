@@ -45,6 +45,21 @@ NSString *const AsyncImageURLKey = @"URL";
 NSString *const AsyncImageCacheKey = @"cache";
 NSString *const AsyncImageErrorKey = @"error";
 
+@interface NSURL (Hash)
+
+- (NSString *)computeHash;
+
+@end
+
+@implementation NSURL (Hash)
+
+- (NSString *)computeHash {
+    NSCharacterSet *doNotWant = [NSCharacterSet characterSetWithCharactersInString:@"/:?&="];
+    return [[self.absoluteString componentsSeparatedByCharactersInSet: doNotWant] componentsJoinedByString: @""];
+}
+
+@end
+
 
 @interface AsyncImageCache ()
 
@@ -119,7 +134,7 @@ NSString *const AsyncImageErrorKey = @"error";
     UIImage *img = [cache objectForKey:URL];
     if (!img && storeToDisk && pathOnDisk)
     {
-        NSString *path = [pathOnDisk stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", URL.hash]];
+        NSString *path = [pathOnDisk stringByAppendingPathComponent:[URL computeHash]];
         if([[NSFileManager defaultManager] fileExistsAtPath:path]) 
         {
             img = [UIImage imageWithContentsOfFile:path];
@@ -152,7 +167,7 @@ NSString *const AsyncImageErrorKey = @"error";
     if (storeToDisk && pathOnDisk)
     {
         // remove the item from the disk cache as well
-        NSString *path = [pathOnDisk stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", URL.hash]];
+        NSString *path = [pathOnDisk stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", [URL computeHash]]];
         if ([[NSFileManager defaultManager] fileExistsAtPath:path])
         {
             [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
@@ -347,7 +362,7 @@ NSString *const AsyncImageErrorKey = @"error";
                 @autoreleasepool {
                     if([cache storeToDisk] && [cache pathOnDisk])
                     {
-                        [_data writeToFile:[[cache pathOnDisk] stringByAppendingPathComponent:[NSString stringWithFormat:@"%d", URL.hash]] atomically:YES];
+                        [_data writeToFile:[[cache pathOnDisk] stringByAppendingPathComponent:[URL computeHash]] atomically:YES];
                     }
                 }
                 
