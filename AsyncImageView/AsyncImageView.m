@@ -496,7 +496,9 @@ NSString *const AsyncImageErrorKey = @"error";
 @end
 
 
-@interface AsyncImageLoader ()
+@interface AsyncImageLoader () {
+    NSMutableArray *cancellingTargets;
+}
 
 @property (nonatomic, strong) NSMutableArray *connections;
 
@@ -715,6 +717,12 @@ NSString *const AsyncImageErrorKey = @"error";
 
 - (void)cancelLoadingForTarget:(id)target
 {
+    if([cancellingTargets containsObject:target]) {
+        return;
+    } else {
+        if(!cancellingTargets) cancellingTargets = [[NSMutableArray alloc] init];
+        [cancellingTargets addObject:target];
+    }
     for (int i = [connections count] - 1; i >= 0; i--)
     {
         AsyncImageConnection *connection = [connections objectAtIndex:i];
@@ -724,6 +732,7 @@ NSString *const AsyncImageErrorKey = @"error";
             [connections removeObjectAtIndex:i];
         }
     }
+    [cancellingTargets removeObject:target];
 }
 
 - (NSURL *)URLForTarget:(id)target action:(SEL)action
@@ -899,6 +908,7 @@ BOOL defaultLoadOnlyMostRecentURL = NO;
 {
     [[AsyncImageLoader sharedLoader] cancelLoadingForTarget:self];
 	AH_RELEASE(activityView);
+    activityView = nil;
     AH_SUPER_DEALLOC;
 }
 
